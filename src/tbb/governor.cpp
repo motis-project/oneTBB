@@ -174,7 +174,13 @@ static void get_stack_attributes(std::uintptr_t& stack_base, std::size_t& stack_
     pthread_attr_t np_attr_stack;
     if (0 == pthread_getattr_np(pthread_self(), &np_attr_stack)) {
         if (0 == pthread_attr_getstack(&np_attr_stack, &stack_limit, &np_stack_size)) {
+#if defined(__clang__)
+#if !(__has_feature(address_sanitizer))
             __TBB_ASSERT( &stack_limit > stack_limit, "stack size must be positive" );
+#endif
+#else
+          __TBB_ASSERT( &stack_limit > stack_limit, "stack size must be positive" );
+#endif
             if (np_stack_size > 0)
                 stack_size = np_stack_size;
         }
